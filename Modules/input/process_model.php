@@ -94,6 +94,8 @@ class Process
         $list[34] = array(_("Wh Accumulator"),ProcessArg::FEEDID,"wh_accumulator",1,DataType::REALTIME,"Main",array(Engine::PHPFINA,Engine::PHPTIMESERIES));
         
         // $list[29] = array(_("save to input"),ProcessArg::INPUTID,"save_to_input",1,DataType::UNDEFINED);
+        $list[35] = array(_("Last Feed value"),ProcessArg::FEEDID,"last_feed_value",1,DataType::REALTIME,"Misc",array(Engine::PHPFIWA,Engine::PHPFINA,Engine::PHPTIMESERIES));               
+        $list[36] = array(_("Accumulator Daily"),ProcessArg::FEEDID,"accumulator_daily",1,DataType::DAILY,"Misc",array(Engine::PHPTIMESERIES));               
 
         return $list;
     }
@@ -411,7 +413,7 @@ class Process
         return $value;
     }
     /*
-    public function accumulator_daily($feedid, $time_now, $value)
+    public function OLD_accumulator_daily($feedid, $time_now, $value)
     {
         $last = $this->feed->get_timevalue($feedid);
         $value = $last['value'] + $value;
@@ -624,6 +626,34 @@ class Process
         $redis->hMset("process:whaccumulator:$feedid", array('time' => $time, 'value' => $value));
 
         return $totalwh;
+    }
+
+    //--------------------------------------------------------------------------------
+    // Simulate paralell processing of same input: give input back so chain can restart
+    //--------------------------------------------------------------------------------
+    public function last_feed_value($feedid, $time, $value)
+    {
+        $last = $this->feed->get_timevalue($feedid);
+        $value2 = $last['value'];
+        return $value2;
+    }
+
+    public function accumulator_daily($feedid, $time_now, $value)
+    {
+        $last = $this->feed->get_timevalue($feedid);
+        $last['time'] = strtotime($last['time']);
+        $last_time = $last['time']*1;
+        $current_slot = $this->getstartday($time_now);
+        $last_slot = $this->getstartday($last_time);
+        
+        if($last_slot == $current_slot) {
+            $value = $last['value'] + $value;
+            $this->feed->update_data($feedid, $time_now, $current_slot, $value);
+        } else {
+            # We are working in a new slot (new day) so don't increment it with the data from yesterday
+            $this->feed->insert_data($feedid, $time_now, $current_slot, $value);
+        }
+        return $value;
     }
 
     // No longer used
