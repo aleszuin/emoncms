@@ -27,6 +27,8 @@
 
     $visdir = "vis/visualisations/";
 
+    require "Modules/vis/vis_object.php";
+
     /*
       1 - realtime
       2 - daily
@@ -105,7 +107,7 @@
                         $key = $option[0]; $type = $option[1];
                         if (isset($option[2])) $default = $option[2]; else $default = "";
 
-                        if ($type==1 || $type==2 || $type==3)
+                        if ($type==0 || $type==1 || $type==2 || $type==3)
                         {
                             $feedid = (int) get($key);
                             if ($feedid) {

@@ -23,6 +23,8 @@ global $path;
 <script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/vis/multigraph_api.js"></script>
 <script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/vis/visualisations/vis.helper.js"></script>
 
+<script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/vis/jquery.flot.hiddengraphs.js"></script>
+
 <h2><?php echo _("Visualisations"); ?></h2>
 
 <div id="vispage">
@@ -176,7 +178,7 @@ global $path;
 
             var type = box_options[z][1];
 
-            if (type == 1 || type == 2 || type == 3)
+            if (type == 0 || type == 1 || type == 2 || type == 3)
             {
                 options_html += "<td>"+select_feed(box_options[z][0], feedlist, type)+"</td>";
             }
@@ -196,7 +198,10 @@ global $path;
         var out = "<select style='width:120px' id='"+id+"' class='options' otype='feed'>";
         for (i in feedlist)
         {
+            
             if (feedlist[i]['datatype']==type) out += "<option value='"+feedlist[i]['id']+"' public='"+feedlist[i]['public']+"'>"+feedlist[i]['id']+": "+feedlist[i]['name']+"</option>";
+            if (type==0 && feedlist[i]['datatype']==1) out += "<option value='"+feedlist[i]['id']+"' public='"+feedlist[i]['public']+"'>"+feedlist[i]['id']+": "+feedlist[i]['name']+"</option>";
+            if (type==0 && feedlist[i]['datatype']==2) out += "<option value='"+feedlist[i]['id']+"' public='"+feedlist[i]['public']+"'>"+feedlist[i]['id']+": "+feedlist[i]['name']+"</option>";
         }
         out += "</select>";
         return out;

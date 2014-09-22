@@ -23,7 +23,8 @@ class Feed
     private $csvdownloadlimit_mb = 10;
     private $log;
     
-    private $max_npoints_returned = 800;
+    // 5 years of daily data
+    private $max_npoints_returned = 1825;
 
     public function __construct($mysqli,$redis,$settings)
     {        
@@ -44,7 +45,8 @@ class Feed
         require "Modules/feed/engine/PHPFiwa.php";     
            
         // Backwards compatibility 
-        if (!isset($settings)) $settings= array();
+        // if (!isset($settings)) $settings= array();
+        $settings= array();
         if (!isset($settings['timestore'])) {
             global $timestore_adminkey; 
             $settings['timestore'] = array('adminkey'=>$timestore_adminkey);
