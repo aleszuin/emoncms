@@ -126,7 +126,7 @@
 
     function bargraph(dataA,dataB,barwidth, mode)
     {
-        $.plot($("#graph"), [ {color: "#0096ff", data:dataA}, {color: "#7cc9ff", data:dataB}],
+        $.plot($("#graph"), [ {color: "#ff0000", data:dataA}, {color: "#7cc9ff", data:dataB}],
         {
             series: {
             stack: true,
