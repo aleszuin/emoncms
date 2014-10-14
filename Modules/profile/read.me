@@ -1,0 +1,34 @@
+Hi,
+
+Attached is an Emoncms module that I'm developing to get the typical profile of my feeds.
+I'm using this module to analyze and characterize my data.
+It also helps me to detect erratic data in my feeds.
+
+This modules can draw daily or weekly profiles on a specific period defined by a start date and an end date. A profile is a set of average value that are calculated for every time step (5min/10min/20min/30min/1h/2h/4h)
+In daily profiles, you can take into account only some days (monday to friday by example)
+In all profiles, you can exclude some days (by example non-working day, or days with erratic data collection)
+
+On the bottom of the page, one can visualize on a different period :
+   - the feed
+   - the average feed on the time step
+   - the profile
+   - the profile +/- the standard deviation
+   - the gap between the profile and the average 
+
+4 profiles, can be configured and saved.
+Only PHPFIWA feeds are supported as of now.
+
+This  module is fully based on the dynamic module that I modified. 
+If needed, I will put it on github.
+Installation :
+   1. copy the directory "profile" in xxx/emoncms/Modules
+   2. Log in your emoncms server as admin.
+   3. Go in the admin section (top right corner)
+   4. Click on the "Update and check" button.
+
+Futur dev : 
+   - clean some dirty part of the code ... and also transalte my frenglish in english
+   - add support for all engines
+   - periodic post of the profile value that corresponds to the current time. In that way, it would be possible to make a comparaison between the current value of a feed and its associated profile. And eventually raise an alert. (it may require a new process). 
+
+
