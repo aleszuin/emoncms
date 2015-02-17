@@ -33,16 +33,19 @@ cursor:pointer
         </div>
 
         <hr>
-        <button id="refreshfeedsize" class="btn btn-small" >Refresh feed size <i class="icon-refresh" ></i></button>
+        <button id="refreshfeedsize" class="btn btn-small" ><i class="icon-refresh" ></i>&nbsp;<?php echo _('Refresh feed size'); ?></button>
 </div>
 
 <div id="myModal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="myModalLabel"><?php echo _('WARNING deleting a feed is permanent'); ?></h3>
+        <h3 id="myModalLabel"><?php echo _('Delete feed'); ?></h3>
     </div>
     <div class="modal-body">
-        <p><?php echo _('Are you sure you want to delete this feed?'); ?></p>
+        <p><?php echo _('Deleting a feed is permanent.'); ?>
+           <br><br>
+           <?php echo _('Are you sure you want to delete?'); ?>
+        </p>
     </div>
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal" aria-hidden="true"><?php echo _('Cancel'); ?></button>
@@ -84,7 +87,7 @@ cursor:pointer
                     <option value=5>5s</option>
                     <option value=10>10s</option>
                     <option value=30>30s</option>
-                    <option value=60>1 mi</option>
+                    <option value=60>1 min</option>
                     <option value=300>5 mins</option>
                     <option value=600>10 mins</option>
                     <option value=1800>30 mins</option>
@@ -181,19 +184,29 @@ cursor:pointer
         } });
     }
 
-    var updater = setInterval(update, 5000);
-
-    $("#table").bind("onEdit", function(e){
+    var updater;
+    function updaterStart(func, interval)
+    {
         clearInterval(updater);
+        updater = null;
+        if (interval > 0) updater = setInterval(func, interval);
+    }
+    updaterStart(update, 5000);
+    
+    $("#table").bind("onEdit", function(e){
+        updaterStart(update, 0);
     });
 
     $("#table").bind("onSave", function(e,id,fields_to_update){
         feed.set(id,fields_to_update);
-        updater = setInterval(update, 5000);
+    });
+    
+    $("#table").bind("onResume", function(e){
+        updaterStart(update, 5000);
     });
 
     $("#table").bind("onDelete", function(e,id,row){
-        clearInterval(updater);
+        updaterStart(update, 0);
         $('#myModal').modal('show');
         $('#myModal').attr('feedid',id);
         $('#myModal').attr('feedrow',row);
@@ -208,7 +221,7 @@ cursor:pointer
         update();
 
         $('#myModal').modal('hide');
-        updater = setInterval(update, 5000);
+        updaterStart(update, 5000);
     });
 
     $("#refreshfeedsize").click(function(){

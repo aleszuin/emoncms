@@ -16,9 +16,9 @@
 
 // 1) Setup swift mailer transport 
 require_once 'swift_required.php';
-$transport = Swift_SmtpTransport::newInstance('mail.yourserver.com', 26)
-  ->setUsername('username')
-  ->setPassword('password')
+$transport = Swift_SmtpTransport::newInstance('smtp.libero.it', 26)
+  ->setUsername('alessandro.zuin@libero.it')
+  ->setPassword('Paperino123')
 ;
 // Create the Mailer using your created Transport
 $mailer = Swift_Mailer::newInstance($transport);
@@ -28,7 +28,7 @@ $mailer = Swift_Mailer::newInstance($transport);
 $now = time();
 $h24 = date("Y-n-j H:i:s", time() - (3600*2));
 $h48 = date("Y-n-j H:i:s", time() - (3600*4));
-$mysqli = new mysqli("localhost","username","password","database");
+$mysqli = new mysqli("localhost","root","CippaLippa2020","emoncms");
 $result = $mysqli->query("SELECT id,userid,name FROM feeds WHERE `time`>='$h48' AND `time`<='$h24';");
 
 $users = array();

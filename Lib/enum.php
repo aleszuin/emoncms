@@ -5,6 +5,8 @@
     const INPUTID = 1;
     const FEEDID = 2;
     const NONE = 3;
+    const TEXT = 4;
+    const SCHEDULEID = 5;
   }
 
   class DataType {

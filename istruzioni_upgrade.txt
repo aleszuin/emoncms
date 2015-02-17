@@ -1,0 +1,34 @@
+Upgrade EmonCMS
+
+0)  collegati con 'pi'
+    diventare root :   sudo /bin/bash
+
+1) stoppare i servizi
+            service apache2 stop
+            service rfm12piphp stop
+
+2) rinomina la directory per sicurezza:   esempio
+            cd  /var/www/
+            mv emoncms OLD_emoncms
+	    ls -la
+
+3) scarica la nuova versione  ( sempre posizionati su /var/www/ come directory corrente )
+            git clone https://github.com/aleszuin/emoncms.git
+
+4) copia il file di settings
+            cd /var/www/
+            cp ./OLD_emoncms/settings.php ./emoncms/
+
+5) eventualmente aggiornare il file di settings con quello di default presente nel repository
+            cd /var/www/
+            diff ./emoncms/settings.php ./emoncms/default.settings.php
+
+6) sistemare le autorizzazioni
+            chmod ugo+rwx /var/www/emoncms/Modules/raspberrypi/raspberrypi_run.php
+	    chmod ugo+rwx /var/www/emoncms/Zuin/*
+ 
+7) riavviare i servizi 
+            service apache2 restart
+            service rfm12piphp restart
+   forse meglio un reboot per sicurezza
+

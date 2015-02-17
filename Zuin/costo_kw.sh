@@ -38,15 +38,15 @@ fi
 
 if [ "$fascia" -eq "1" ];
  then
-   costo=20;
+   costo=23;
 fi
 if [ "$fascia" -eq "2" ];
  then
-   costo=12;
+   costo=21;
 fi
 if [ "$fascia" -eq "3" ];
  then
-   costo=9;
+   costo=21;
 fi
 
 
