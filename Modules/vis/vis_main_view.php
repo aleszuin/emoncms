@@ -91,8 +91,10 @@ global $path;
     {
         // If widget action specified: use action otherwise override with widget key
         var action = z;
+        var label = z;
         if (widgets[z]['action']!=undefined) action = widgets[z]['action'];
-        out += "<option value='"+action+"' >"+z+"</option>";
+        if (widgets[z]['label']!=undefined) label = widgets[z]['label'];
+        out += "<option value='"+action+"' >"+label+"</option>";
     }
     out += '</select>';
     $("#select").html(out);
@@ -174,9 +176,9 @@ global $path;
         var options_html = "<table>";
         for (z in box_options)
         {
-            options_html += "<tr><td style='width:100px'><b>"+box_options[z][0]+":</b></td>";
+            options_html += "<tr><td style='width:100px'><b>"+box_options[z][1]+":</b></td>";
 
-            var type = box_options[z][1];
+            var type = box_options[z][2];
 
             if (type == 0 || type == 1 || type == 2 || type == 3)
             {
@@ -184,7 +186,7 @@ global $path;
             }
             else
             {
-                options_html += "<td><input style='width:120px' class='options' id='"+box_options[z][0]+"' type='text' value='"+box_options[z][2]+"' / ></td>";
+                options_html += "<td><input style='width:120px' class='options' id='"+box_options[z][0]+"' type='text' value='"+box_options[z][3]+"' / ></td>";
             }
             options_html += "</tr>";
         }

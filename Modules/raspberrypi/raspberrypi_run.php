@@ -48,7 +48,7 @@
   $input = new Input($mysqli,$redis,$feed);
 
   require "Modules/input/process_model.php";
-  $process = new Process($mysqli,$input,$feed);
+  $process = new Process($mysqli,$input,$feed,null);
 
   include "Modules/raspberrypi/raspberrypi_model.php";
   $raspberrypi = new RaspberryPI($mysqli);

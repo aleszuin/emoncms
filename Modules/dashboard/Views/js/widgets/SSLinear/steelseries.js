@@ -1,8 +1,8 @@
 /*!
  * Name          : steelseries.js
  * Authors       : Gerrit Grunwald, Mark Crossley
- * Last modified : 17.05.2013
- * Revision      : 0.14.3
+ * Last modified : 27.03.2015
+ * Revision      : 0.14.14
  *
  * Copyright (c) 2011, Gerrit Grunwald, Mark Crossley
  * All rights reserved.
@@ -22,9 +22,9 @@
  *   OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /*globals Tween */
+/*jshint onevar:false,plusplus:false,nomen:false,bitwise:false*/
 
 var steelseries = (function () {
-
     // Constants
     var HALF_PI     = Math.PI * 0.5,
         TWO_PI      = Math.PI * 2,
@@ -84,7 +84,7 @@ var steelseries = (function () {
             fullScaleDeflectionTime = (undefined === parameters.fullScaleDeflectionTime ? 2.5 : parameters.fullScaleDeflectionTime);
 
         // Get the canvas context and clear it
-        var mainCtx = doc.getElementById(canvas).getContext('2d');
+        var mainCtx = getCanvasContext(canvas);
         // Has a size been specified?
         if (size === 0) {
             size = Math.min(mainCtx.canvas.width, mainCtx.canvas.height);
@@ -99,7 +99,6 @@ var steelseries = (function () {
         if (playAlarm && alarmSound !== false) {
             audioElement = doc.createElement('audio');
             audioElement.setAttribute('src', alarmSound);
-            //audioElement.setAttribute('src', 'js/alarm.mp3');
             audioElement.setAttribute('preload', 'auto');
         }
 
@@ -403,7 +402,6 @@ var steelseries = (function () {
             } else {
                 ctx.arc(0, 0, imageWidth * 0.365, startAngle, stopAngle, false);
             }
-//            ctx.closePath();
             if (filled) {
                 ctx.moveTo(0, 0);
                 ctx.fill();
@@ -441,7 +439,6 @@ var steelseries = (function () {
             ctx.fillStyle = backgroundColor.labelColor.getRgbaColor();
             ctx.translate(centerX, centerY);
             ctx.rotate(rotationOffset);
-
 
             if (gaugeType.type === 'type1' || gaugeType.type === 'type2') {
                 TEXT_WIDTH = imageWidth * 0.04;
@@ -822,7 +819,6 @@ var steelseries = (function () {
             }
         };
 
-
         //************************************ Public methods **************************************
         this.setValue = function (newValue) {
             newValue = parseFloat(newValue);
@@ -875,7 +871,7 @@ var steelseries = (function () {
             return odoValue;
         };
 
-        this.setValueAnimated = function (newValue) {
+        this.setValueAnimated = function (newValue, callback) {
             newValue = parseFloat(newValue);
             var targetValue = (newValue < minValue ? minValue : (newValue > maxValue ? maxValue : newValue)),
                 gauge = this,
@@ -921,6 +917,12 @@ var steelseries = (function () {
                         requestAnimFrame(gauge.repaint);
                     }
                 };
+
+                // do we have a callback function to process?
+                if (callback && typeof(callback) === "function") {
+                    tween.onMotionFinished = callback;
+                }
+
                 tween.start();
             }
             return this;
@@ -1359,7 +1361,7 @@ var steelseries = (function () {
             fullScaleDeflectionTime = (undefined === parameters.fullScaleDeflectionTime ? 2.5 : parameters.fullScaleDeflectionTime);
 
         // Get the canvas context and clear it
-        var mainCtx = doc.getElementById(canvas).getContext('2d');
+        var mainCtx = getCanvasContext(canvas);
         // Has a size been specified?
         if (size === 0) {
             size = Math.min(mainCtx.canvas.width, mainCtx.canvas.height);
@@ -1419,7 +1421,7 @@ var steelseries = (function () {
         var ACTIVE_LED_POS_X = imageWidth * 0.116822;
         var ACTIVE_LED_POS_Y = imageWidth * 0.485981;
         var LED_SIZE = Math.ceil(size * 0.093457);
-//        var LED_POS_X = imageWidth * 0.453271;
+        //var LED_POS_X = imageWidth * 0.453271;
         var LED_POS_X = imageWidth * 0.53;
         var LED_POS_Y = imageHeight * 0.61;
         var USER_LED_POS_X = gaugeType === steelseries.GaugeType.TYPE3 ? 0.7 * imageWidth : centerX - LED_SIZE / 2;
@@ -1461,7 +1463,7 @@ var steelseries = (function () {
             angleStep = angleRange / range;
             break;
 
-        case "type4":
+        case 'type4':
         /* falls through */
         default:
             freeAreaAngle = 60 * RAD_FACTOR;
@@ -1547,8 +1549,8 @@ var steelseries = (function () {
                 niceMinValue = minValue;
                 niceMaxValue = maxValue;
                 range = niceRange;
-//                minorTickSpacing = 1;
-//                majorTickSpacing = 10;
+                //minorTickSpacing = 1;
+                //majorTickSpacing = 10;
                 majorTickSpacing = calcNiceNumber(niceRange / (maxNoOfMajorTicks - 1), true);
                 minorTickSpacing = calcNiceNumber(majorTickSpacing / (maxNoOfMinorTicks - 1), true);
             }
@@ -2026,7 +2028,7 @@ var steelseries = (function () {
             return value;
         };
 
-        this.setValueAnimated = function (newValue) {
+        this.setValueAnimated = function (newValue, callback) {
             newValue = parseFloat(newValue);
             var targetValue = (newValue < minValue ? minValue : (newValue > maxValue ? maxValue : newValue)),
                 gauge = this,
@@ -2065,6 +2067,12 @@ var steelseries = (function () {
                         requestAnimFrame(gauge.repaint);
                     }
                 };
+
+                // do we have a callback function to process?
+                if (callback && typeof(callback) === "function") {
+                    tween.onMotionFinished = callback;
+                }
+
                 tween.start();
             }
             return this;
@@ -2333,7 +2341,7 @@ var steelseries = (function () {
                     // Convert angle back to value
                     currentValue = minValue + (angle / degAngleRange) * (maxValue - minValue);
                     gradRange = valueGradient.getEnd() - valueGradient.getStart();
-                    fraction = currentValue / gradRange;
+                    fraction = (currentValue - minValue) / gradRange;
                     fraction = Math.max(Math.min(fraction, 1), 0);
                     activeLedColor = customColorDef(valueGradient.getColorAt(fraction).getRgbaColor());
                 } else if (isSectionsVisible) {
@@ -2438,7 +2446,7 @@ var steelseries = (function () {
             fullScaleDeflectionTime = (undefined === parameters.fullScaleDeflectionTime ? 2.5 : parameters.fullScaleDeflectionTime);
 
         // Get the canvas context and clear it
-        var mainCtx = doc.getElementById(canvas).getContext('2d');
+        var mainCtx = getCanvasContext(canvas);
         // Has a size been specified?
         if (size === 0) {
             size = Math.min(mainCtx.canvas.width, mainCtx.canvas.height);
@@ -2636,7 +2644,6 @@ var steelseries = (function () {
             } else {
                 ctx.arc(0, 0, imageWidth * 0.365, startAngle, stopAngle, false);
             }
-//            ctx.closePath();
             if (filled) {
                 ctx.moveTo(0, 0);
                 ctx.fill();
@@ -3052,7 +3059,7 @@ var steelseries = (function () {
             return value;
         };
 
-        this.setValueAnimated = function (newValue) {
+        this.setValueAnimated = function (newValue, callback) {
             newValue = parseFloat(newValue);
             var targetValue = (newValue < minValue ? minValue : (newValue > maxValue ? maxValue : newValue)),
                 gauge = this,
@@ -3099,6 +3106,12 @@ var steelseries = (function () {
                         requestAnimFrame(gauge.repaint);
                     }
                 };
+
+                // do we have a callback function to process?
+                if (callback && typeof(callback) === "function") {
+                    tween.onMotionFinished = callback;
+                }
+
                 tween.start();
             }
             return this;
@@ -3334,7 +3347,7 @@ var steelseries = (function () {
             fullScaleDeflectionTime = (undefined === parameters.fullScaleDeflectionTime ? 2.5 : parameters.fullScaleDeflectionTime);
 
         // Get the canvas context and clear it
-        var mainCtx = doc.getElementById(canvas).getContext('2d');
+        var mainCtx = getCanvasContext(canvas);
         // Has a size been specified?
         if (width === 0) {
             width = mainCtx.canvas.width;
@@ -3514,9 +3527,8 @@ var steelseries = (function () {
 
         var createThresholdImage = function (vertical) {
             var thresholdBuffer = doc.createElement('canvas');
-            thresholdBuffer.height = thresholdBuffer.width = minMaxIndSize;
-//            thresholdBuffer.width;
             var thresholdCtx = thresholdBuffer.getContext('2d');
+            thresholdBuffer.height = thresholdBuffer.width = minMaxIndSize;
 
             thresholdCtx.save();
             var gradThreshold = thresholdCtx.createLinearGradient(0, 0.1, 0, thresholdBuffer.height * 0.9);
@@ -4195,7 +4207,7 @@ var steelseries = (function () {
             return value;
         };
 
-        this.setValueAnimated = function (newValue) {
+        this.setValueAnimated = function (newValue, callback) {
             var targetValue,
                 gauge = this,
                 time;
@@ -4240,6 +4252,11 @@ var steelseries = (function () {
                         requestAnimFrame(gauge.repaint);
                     }
                 };
+
+                // do we have a callback function to process?
+                if (callback && typeof(callback) === "function") {
+                    tween.onMotionFinished = callback;
+                }
 
                 tween.start();
             }
@@ -4423,7 +4440,6 @@ var steelseries = (function () {
                       foreground: true});
             }
 
-
             mainCtx.clearRect(0, 0, mainCtx.canvas.width, mainCtx.canvas.height);
 
             // Draw frame
@@ -4536,7 +4552,7 @@ var steelseries = (function () {
             fullScaleDeflectionTime = (undefined === parameters.fullScaleDeflectionTime ? 2.5 : parameters.fullScaleDeflectionTime);
 
         // Get the canvas context and clear it
-        var mainCtx = doc.getElementById(canvas).getContext('2d');
+        var mainCtx = getCanvasContext(canvas);
         // Has a size been specified?
         if (width === 0) {
             width = mainCtx.canvas.width;
@@ -5292,7 +5308,7 @@ var steelseries = (function () {
                         // Convert pixel back to value
                         currentValue = minValue + (translateY / fullSize) * (maxValue - minValue);
                         gradRange = valueGradient.getEnd() - valueGradient.getStart();
-                        fraction = currentValue / gradRange;
+                        fraction = (currentValue - minValue) / gradRange;
                         fraction = Math.max(Math.min(fraction, 1), 0);
                         activeLedColor = customColorDef(valueGradient.getColorAt(fraction).getRgbaColor());
                     } else if (isSectionsVisible) {
@@ -5330,7 +5346,7 @@ var steelseries = (function () {
                         // Convert pixel back to value
                         currentValue = minValue + (translateX / fullSize) * (maxValue - minValue);
                         gradRange = valueGradient.getEnd() - valueGradient.getStart();
-                        fraction = currentValue / gradRange;
+                        fraction = (currentValue - minValue) / gradRange;
                         fraction = Math.max(Math.min(fraction, 1), 0);
                         activeLedColor = customColorDef(valueGradient.getColorAt(fraction).getRgbaColor());
                     } else if (isSectionsVisible) {
@@ -5428,7 +5444,7 @@ var steelseries = (function () {
             return value;
         };
 
-        this.setValueAnimated = function (newValue) {
+        this.setValueAnimated = function (newValue, callback) {
             var targetValue,
                 gauge = this,
                 time;
@@ -5476,6 +5492,11 @@ var steelseries = (function () {
                         requestAnimFrame(gauge.repaint);
                     }
                 };
+
+                // do we have a callback function to process?
+                if (callback && typeof(callback) === "function") {
+                    tween.onMotionFinished = callback;
+                }
 
                 tween.start();
             }
@@ -5792,7 +5813,7 @@ var steelseries = (function () {
         var self = this;
 
         // Get the canvas context and clear it
-        var mainCtx = doc.getElementById(canvas).getContext('2d');
+        var mainCtx = getCanvasContext(canvas);
         // Has a size been specified?
         if (width === 0) {
             width = mainCtx.canvas.width;
@@ -5825,7 +5846,7 @@ var steelseries = (function () {
         var drawLcdText = function (value, color) {
             mainCtx.save();
             mainCtx.textAlign = 'right';
-//            mainCtx.textBaseline = 'top';
+            //mainCtx.textBaseline = 'top';
             mainCtx.strokeStyle = color;
             mainCtx.fillStyle = color;
 
@@ -6094,7 +6115,7 @@ var steelseries = (function () {
             altValue = (undefined === parameters.altValue ? 0 : parameters.altValue);
 
         // Get the canvas context and clear it
-        var mainCtx = doc.getElementById(canvas).getContext('2d');
+        var mainCtx = getCanvasContext(canvas);
         // Has a size been specified?
         if (width === 0) {
             width = mainCtx.canvas.width;
@@ -6220,7 +6241,7 @@ var steelseries = (function () {
 
         // **************   Public methods  ********************
         this.setValue = function (newValue) {
-            if (value !== newValue || altValue !== newValue) {
+            if (value !== newValue) {
                 if (linkAltValue) {
                     altValue = value;
                 }
@@ -6230,9 +6251,9 @@ var steelseries = (function () {
             return this;
         };
 
-        this.setAltValue = function (altValue) {
-            if (altValue !== altValue) {
-                altValue = altValue;
+        this.setAltValue = function (altValueNew) {
+            if (altValue !== altValueNew) {
+                altValue = altValueNew;
                 this.repaint();
             }
             return this;
@@ -6281,7 +6302,7 @@ var steelseries = (function () {
             rotateFace = (undefined === parameters.rotateFace ? false : parameters.rotateFace);
 
         // Get the canvas context and clear it
-        var mainCtx = doc.getElementById(canvas).getContext('2d');
+        var mainCtx = getCanvasContext(canvas);
         // Has a size been specified?
         if (size === 0) {
             size = Math.min(mainCtx.canvas.width, mainCtx.canvas.height);
@@ -6753,7 +6774,7 @@ var steelseries = (function () {
             return value;
         };
 
-        this.setValueAnimated = function (newValue) {
+        this.setValueAnimated = function (newValue, callback) {
             newValue = parseFloat(newValue);
             if (360 - newValue + value < newValue - value) {
                 newValue = 360 - newValue;
@@ -6817,6 +6838,12 @@ var steelseries = (function () {
                         requestAnimFrame(gauge.repaint);
                     }
                 };
+
+                // do we have a callback function to process?
+                if (callback && typeof(callback) === "function") {
+                    tween.onMotionFinished = callback;
+                }
+
                 tween.start();
             }
             return this;
@@ -6953,7 +6980,7 @@ var steelseries = (function () {
         var angle = this.value;
 
         // Get the canvas context and clear it
-        var mainCtx = doc.getElementById(canvas).getContext('2d');
+        var mainCtx = getCanvasContext(canvas);
         // Has a size been specified?
         if (size === 0) {
             size = Math.min(mainCtx.canvas.width, mainCtx.canvas.height);
@@ -7326,7 +7353,6 @@ var steelseries = (function () {
             roseBuffer.height = size;
             roseContext = roseBuffer.getContext('2d');
 
-
             // Buffer for pointer image painting code
             pointerBuffer.width = size;
             pointerBuffer.height = size;
@@ -7352,7 +7378,7 @@ var steelseries = (function () {
             return value;
         };
 
-        this.setValueAnimated = function (newValue) {
+        this.setValueAnimated = function (newValue, callback) {
             var targetValue = newValue % 360;
             var gauge = this;
             var diff;
@@ -7374,6 +7400,12 @@ var steelseries = (function () {
                         requestAnimFrame(gauge.repaint);
                     }
                 };
+
+                // do we have a callback function to process?
+                if (callback && typeof(callback) === "function") {
+                    tween.onMotionFinished = callback;
+                }
+
                 tween.start();
             }
             return this;
@@ -7524,7 +7556,7 @@ var steelseries = (function () {
         var repainting = false;
 
         // Get the canvas context and clear it
-        var mainCtx = doc.getElementById(canvas).getContext('2d');
+        var mainCtx = getCanvasContext(canvas);
         // Has a size been specified?
         if (size === 0) {
             size = Math.min(mainCtx.canvas.width, mainCtx.canvas.height);
@@ -7578,7 +7610,6 @@ var steelseries = (function () {
             mainCtx.strokeStyle = lcdColor.textColor;
             mainCtx.fillStyle = lcdColor.textColor;
 
-
             //convert value from -180,180 range into 0-360 range
             while (value < -180) {
                 value += 360;
@@ -7628,7 +7659,6 @@ var steelseries = (function () {
             } else {
                 ctx.arc(0, 0, imageWidth * 0.365, startAngle, stopAngle, false);
             }
-//            ctx.closePath();
             if (filled) {
                 ctx.moveTo(0, 0);
                 ctx.fill();
@@ -7643,7 +7673,7 @@ var steelseries = (function () {
         var drawTickmarksImage = function (ctx) {
             var OUTER_POINT = imageWidth * 0.38,
                 MAJOR_INNER_POINT = imageWidth * 0.35,
-//                MED_INNER_POINT = imageWidth * 0.355,
+                //MED_INNER_POINT = imageWidth * 0.355,
                 MINOR_INNER_POINT = imageWidth * 0.36,
                 TEXT_WIDTH = imageWidth * 0.1,
                 TEXT_TRANSLATE_X = imageWidth * 0.31,
@@ -7653,7 +7683,6 @@ var steelseries = (function () {
 
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-
 
             ctx.save();
             ctx.strokeStyle = backgroundColor.labelColor.getRgbaColor();
@@ -7933,7 +7962,6 @@ var steelseries = (function () {
                     while (0 < areaIndex);
                 }
 
-
                 drawTickmarksImage(backgroundContext);
             }
 
@@ -8026,7 +8054,7 @@ var steelseries = (function () {
             return valueAverage;
         };
 
-        this.setValueAnimatedLatest = function (newValue) {
+        this.setValueAnimatedLatest = function (newValue, callback) {
             var targetValue,
                 gauge = this,
                 diff,
@@ -8055,6 +8083,19 @@ var steelseries = (function () {
                             requestAnimFrame(gauge.repaint);
                         }
                     };
+
+                    tweenLatest.onMotionFinished = function () {
+                        valueLatest = targetValue;
+                        if (!repainting) {
+                            repainting = true;
+                            requestAnimFrame(gauge.repaint);
+                        }
+                        // do we have a callback function to process?
+                        if (callback && typeof(callback) === "function") {
+                            callback();
+                        }
+                    };
+
                     tweenLatest.start();
                 } else {
                     // target different from current, but diff is zero (0 -> 360 for instance), so just repaint
@@ -8068,7 +8109,7 @@ var steelseries = (function () {
             return this;
         };
 
-        this.setValueAnimatedAverage = function (newValue) {
+        this.setValueAnimatedAverage = function (newValue, callback) {
             var targetValue,
                 gauge = this,
                 diff, time;
@@ -8094,6 +8135,19 @@ var steelseries = (function () {
                             requestAnimFrame(gauge.repaint);
                         }
                     };
+
+                    tweenAverage.onMotionFinished = function () {
+                        valueAverage = targetValue;
+                        if (!repainting) {
+                            repainting = true;
+                            requestAnimFrame(gauge.repaint);
+                        }
+                        // do we have a callback function to process?
+                        if (callback && typeof(callback) === "function") {
+                            callback();
+                        }
+                    };
+
                     tweenAverage.start();
                 } else {
                     // target different from current, but diff is zero (0 -> 360 for instance), so just repaint
@@ -8290,7 +8344,7 @@ var steelseries = (function () {
         var upsidedown = false;
 
         // Get the canvas context and clear it
-        var mainCtx = doc.getElementById(canvas).getContext('2d');
+        var mainCtx = getCanvasContext(canvas);
         // Has a size been specified?
         if (size === 0) {
             size = Math.min(mainCtx.canvas.width, mainCtx.canvas.height);
@@ -8443,7 +8497,6 @@ var steelseries = (function () {
             // Tickmarks
             var step = 5;
             var stepRad = 5 * RAD_FACTOR;
-//            ctx.save();
             ctx.translate(centerX, centerY);
             ctx.rotate(-HALF_PI);
             ctx.translate(-centerX, -centerY);
@@ -8558,7 +8611,7 @@ var steelseries = (function () {
             return roll;
         };
 
-        this.setRollAnimated = function (newRoll) {
+        this.setRollAnimated = function (newRoll, callback) {
             var gauge = this;
             newRoll = parseFloat(newRoll) % 360;
             if (roll !== newRoll) {
@@ -8576,6 +8629,12 @@ var steelseries = (function () {
                         requestAnimFrame(gauge.repaint);
                     }
                 };
+
+                // do we have a callback function to process?
+                if (callback && typeof(callback) === "function") {
+                    tweenRoll.onMotionFinished = callback;
+                }
+
                 tweenRoll.start();
             }
             return this;
@@ -8612,7 +8671,7 @@ var steelseries = (function () {
             return pitch;
         };
 
-        this.setPitchAnimated = function (newPitch) {
+        this.setPitchAnimated = function (newPitch, callback) {
             var gauge = this;
             newPitch = parseFloat(newPitch);
             // perform all range checking in setPitch()
@@ -8644,6 +8703,12 @@ var steelseries = (function () {
                     }
                     gauge.setPitch(event.target._pos);
                 };
+
+                // do we have a callback function to process?
+                if (callback && typeof(callback) === "function") {
+                    tweenPitch.onMotionFinished = callback;
+                }
+
                 tweenPitch.start();
             }
             return this;
@@ -8724,7 +8789,7 @@ var steelseries = (function () {
         var ledTimerId = 0;
 
         // Get the canvas context and clear it
-        var mainCtx = doc.getElementById(canvas).getContext('2d');
+        var mainCtx = getCanvasContext(canvas);
         // Has a size been specified?
         if (size === 0) {
             size = Math.min(mainCtx.canvas.width, mainCtx.canvas.height);
@@ -8860,7 +8925,7 @@ var steelseries = (function () {
         var ANGLE_STEP = 6;
 
         // Get the canvas context and clear it
-        var mainCtx = doc.getElementById(canvas).getContext('2d');
+        var mainCtx = getCanvasContext(canvas);
         // Has a size been specified?
         if (size === 0) {
             size = Math.min(mainCtx.canvas.width, mainCtx.canvas.height);
@@ -9176,7 +9241,7 @@ var steelseries = (function () {
             second = objDate.getSeconds() + (secondMovesContinuous ? objDate.getMilliseconds() / 1000 : 0);
 
             // Hours
-            if (timeZoneOffsetHour !== 0 && timeZoneOffsetMinute !== 0) {
+            if (timeZoneOffsetHour !== 0) {
                 hour = objDate.getUTCHours() + timeZoneOffsetHour;
             } else {
                 hour = objDate.getHours();
@@ -9184,7 +9249,7 @@ var steelseries = (function () {
             hour = hour % 12;
 
             // Minutes
-            if (timeZoneOffsetHour !== 0 && timeZoneOffsetMinute !== 0) {
+            if (timeZoneOffsetMinute !== 0) {
                 minute = objDate.getUTCMinutes() + timeZoneOffsetMinute;
             } else {
                 minute = objDate.getMinutes();
@@ -9337,7 +9402,7 @@ var steelseries = (function () {
         };
 
         this.setSecond = function (newValue) {
-            second = parseInt(newValue, 10) % 60;
+            newValue = parseInt(newValue, 10) % 60;
             if (second !== newValue) {
                 second = newValue;
                 calculateAngles(hour, minute, second);
@@ -9524,7 +9589,7 @@ var steelseries = (function () {
             value = (undefined === parameters.value ? 50 : parameters.value);
 
         // Get the canvas context and clear it
-        var mainCtx = doc.getElementById(canvas).getContext('2d');
+        var mainCtx = getCanvasContext(canvas);
 
         // Has a size been specified?
         if (size === 0) {
@@ -9668,7 +9733,7 @@ var steelseries = (function () {
             running = false,
             lap = false,
             // Get the canvas context
-            mainCtx = doc.getElementById(canvas).getContext('2d'),
+            mainCtx = getCanvasContext(canvas),
 
             imageWidth, imageHeight,
             centerX, centerY,
@@ -10132,41 +10197,41 @@ var steelseries = (function () {
         };
 
         // Has a size been specified?
-        size = (size === 0 ? Math.min(mainCtx.canvas.width, mainCtx.canvas.height) : size),
+        size = (size === 0 ? Math.min(mainCtx.canvas.width, mainCtx.canvas.height) : size);
 
         // Set the size - also clears it
         mainCtx.canvas.width = size;
         mainCtx.canvas.height = size;
 
-        imageWidth = size,
-        imageHeight = size,
+        imageWidth = size;
+        imageHeight = size;
 
-        centerX = imageWidth / 2,
-        centerY = imageHeight / 2,
+        centerX = imageWidth / 2;
+        centerY = imageHeight / 2;
 
-        smallPointerSize = 0.285 * imageWidth,
-        smallPointerX_Offset = centerX - smallPointerSize / 2,
-        smallPointerY_Offset = 0.17 * imageWidth,
+        smallPointerSize = 0.285 * imageWidth;
+        smallPointerX_Offset = centerX - smallPointerSize / 2;
+        smallPointerY_Offset = 0.17 * imageWidth;
 
         // Buffer for the frame
-        frameBuffer = createBuffer(size, size),
-        frameContext = frameBuffer.getContext('2d'),
+        frameBuffer = createBuffer(size, size);
+        frameContext = frameBuffer.getContext('2d');
 
         // Buffer for static background painting code
-        backgroundBuffer = createBuffer(size, size),
-        backgroundContext = backgroundBuffer.getContext('2d'),
+        backgroundBuffer = createBuffer(size, size);
+        backgroundContext = backgroundBuffer.getContext('2d');
 
         // Buffer for small pointer image painting code
-        smallPointerBuffer = createBuffer(size, size),
-        smallPointerContext = smallPointerBuffer.getContext('2d'),
+        smallPointerBuffer = createBuffer(size, size);
+        smallPointerContext = smallPointerBuffer.getContext('2d');
 
         // Buffer for large pointer image painting code
-        largePointerBuffer = createBuffer(size, size),
-        largePointerContext = largePointerBuffer.getContext('2d'),
+        largePointerBuffer = createBuffer(size, size);
+        largePointerContext = largePointerBuffer.getContext('2d');
 
         // Buffer for static foreground painting code
-        foregroundBuffer = createBuffer(size, size),
-        foregroundContext = foregroundBuffer.getContext('2d'),
+        foregroundBuffer = createBuffer(size, size);
+        foregroundContext = foregroundBuffer.getContext('2d');
 
         // Visualize the component
         start = new Date().getTime();
@@ -10183,6 +10248,9 @@ var steelseries = (function () {
             frameVisible = (undefined === parameters.frameVisible ? true : parameters.frameVisible),
             backgroundColor = (undefined === parameters.backgroundColor ? steelseries.BackgroundColor.DARK_GRAY : parameters.backgroundColor),
             backgroundVisible = (undefined === parameters.backgroundVisible ? true : parameters.backgroundVisible),
+            titleString = (undefined === parameters.titleString ? '' : parameters.titleString),
+            unitString = (undefined === parameters.unitString ? '' : parameters.unitString),
+            unitAltPos = (undefined === parameters.unitAltPos ? false : true),
             knobType = (undefined === parameters.knobType ? steelseries.KnobType.METAL_KNOB : parameters.knobType),
             knobStyle = (undefined === parameters.knobStyle ? steelseries.KnobStyle.BLACK : parameters.knobStyle),
             lcdColor = (undefined === parameters.lcdColor ? steelseries.LcdColor.BLACK : parameters.lcdColor),
@@ -10201,7 +10269,7 @@ var steelseries = (function () {
             imageWidth, imageHeight,
             centerX, centerY,
             stdFont,
-            mainCtx = doc.getElementById(canvas).getContext('2d'),  // Get the canvas context
+            mainCtx = getCanvasContext(canvas),  // Get the canvas context
             // Constants
             TICKMARK_OFFSET = PI,
             //
@@ -10236,7 +10304,7 @@ var steelseries = (function () {
         // Get the canvas context and clear it
         mainCtx.save();
         // Has a size been specified?
-        size = (size === 0 ? Math.min(mainCtx.canvas.width, mainCtx.canvas.height) : size),
+        size = (size === 0 ? Math.min(mainCtx.canvas.width, mainCtx.canvas.height) : size);
 
         // Set the size
         mainCtx.canvas.width = size;
@@ -10247,6 +10315,9 @@ var steelseries = (function () {
 
         centerX = imageWidth / 2;
         centerY = imageHeight / 2;
+
+        var unitStringPosY = unitAltPos ? imageHeight * 0.68 : false;
+
 
         stdFont = Math.floor(imageWidth * 0.09) + 'px ' + stdFontName;
 
@@ -10267,13 +10338,13 @@ var steelseries = (function () {
             if (digitalFont) {
                 mainCtx.font = Math.floor(imageWidth * 0.075) + 'px ' + lcdFontName;
             } else {
-                mainCtx.font = Math.floor(imageWidth * 0.075) + 'px ' + stdFontName;
+                mainCtx.font = Math.floor(imageWidth * 0.075) + 'px bold ' + stdFontName;
             }
             mainCtx.fillText(Math.round(value), (imageWidth + (imageWidth * 0.4)) / 2 - 4, imageWidth * 0.607, imageWidth * 0.4);
             mainCtx.restore();
         };
 
-        var drawTickmarksImage = function (ctx, freeAreaAngle, offset, minVal, maxVal, angleStep, tickLabelPeriod, scaleDividerPower, drawTicks, drawTickLabels) {
+        var drawTickmarksImage = function (ctx, freeAreaAngle, offset, minVal, maxVal, angleStep) {
             var MEDIUM_STROKE = Math.max(imageWidth * 0.012, 2),
                 THIN_STROKE = Math.max(imageWidth * 0.007, 1.5),
                 TEXT_DISTANCE = imageWidth * 0.13,
@@ -10468,6 +10539,9 @@ var steelseries = (function () {
 
                 // Create tickmarks in background buffer (backgroundBuffer)
                 drawTickmarksImage(backgroundContext, 0, TICKMARK_OFFSET, 0, 10, angleStep100ft, tickLabelPeriod, 0, true, true, null);
+
+                // Create title in background buffer (backgroundBuffer)
+                drawTitleImage(backgroundContext, imageWidth, imageHeight, titleString, unitString, backgroundColor, true, true, unitStringPosY);
             }
 
             // Create lcd background if selected in background buffer (backgroundBuffer)
@@ -10540,7 +10614,7 @@ var steelseries = (function () {
             return value;
         };
 
-        this.setValueAnimated = function (newValue) {
+        this.setValueAnimated = function (newValue, callback) {
             newValue = parseFloat(newValue);
             var targetValue = (newValue < minValue ? minValue : newValue),
                 gauge = this,
@@ -10561,6 +10635,11 @@ var steelseries = (function () {
                             requestAnimFrame(gauge.repaint);
                         }
                     };
+
+                // do we have a callback function to process?
+                if (callback && typeof(callback) === "function") {
+                    tween.onMotionFinished = callback;
+                }
 
                 tween.start();
             }
@@ -10597,6 +10676,22 @@ var steelseries = (function () {
 
         this.setLcdColor = function (newLcdColor) {
             lcdColor = newLcdColor;
+            resetBuffers({background: true});
+            init({background: true});
+            this.repaint();
+            return this;
+        };
+
+        this.setTitleString = function (title) {
+            titleString = title;
+            resetBuffers({background: true});
+            init({background: true});
+            this.repaint();
+            return this;
+        };
+
+        this.setUnitString = function (unit) {
+            unitString = unit;
             resetBuffers({background: true});
             init({background: true});
             this.repaint();
@@ -10684,7 +10779,7 @@ var steelseries = (function () {
         var width = (undefined === parameters.width ? 0 : parameters.width),
             height = (undefined === parameters.height ? 0 : parameters.height),
             //
-            mainCtx = doc.getElementById(canvas).getContext('2d'),
+            mainCtx = getCanvasContext(canvas),
             prefHeight, imageWidth, imageHeight,
             redOn = false,
             yellowOn = false,
@@ -10723,7 +10818,6 @@ var steelseries = (function () {
         // Set the size - also clears the canvas
         mainCtx.canvas.width = width;
         mainCtx.canvas.height = height;
-
 
         prefHeight = width < (height * 0.352517) ? (width * 2.836734) : height;
         imageWidth = prefHeight * 0.352517;
@@ -11680,9 +11774,9 @@ var steelseries = (function () {
 
     var odometer = function (canvas, parameters) {
         parameters = parameters || {};
-        var doc = document,
-            // parameters
-            _context = (undefined === parameters._context ? null : parameters._context),  // If component used internally by steelseries
+
+        // parameters
+        var _context = (undefined === parameters._context ? null : parameters._context),  // If component used internally by steelseries
             height = (undefined === parameters.height ? 0 : parameters.height),
             digits = (undefined === parameters.digits ? 6 : parameters.digits),
             decimals = (undefined === parameters.decimals ? 1 : parameters.decimals),
@@ -11711,7 +11805,7 @@ var steelseries = (function () {
         if (_context) {
             ctx = _context;
         } else {
-            ctx = doc.getElementById(canvas).getContext('2d');
+            ctx = getCanvasContext(canvas);
         }
 
         // Has a height been specified?
@@ -11766,7 +11860,6 @@ var steelseries = (function () {
             grad.addColorStop(1, 'rgba(0, 0, 0, 1)');
             foregroundContext.fillStyle = grad;
             foregroundContext.fill();
-
 
             // Create a digit column
             // background
@@ -11855,7 +11948,7 @@ var steelseries = (function () {
             }
         }
 
-        this.setValueAnimated = function (newVal) {
+        this.setValueAnimated = function (newVal, callback) {
             var gauge = this;
             newVal = parseFloat(newVal);
 
@@ -11875,6 +11968,12 @@ var steelseries = (function () {
                         requestAnimFrame(gauge.repaint);
                     }
                 };
+
+                // do we have a callback function to process?
+                if (callback && typeof(callback) === "function") {
+                    tween.onMotionFinished = callback;
+                }
+
                 tween.start();
             }
             this.repaint();
@@ -12142,7 +12241,6 @@ var steelseries = (function () {
             // create a pointer buffer
             ptrBuffer = createBuffer(size, size);
             ptrCtx = ptrBuffer.getContext('2d');
-
 
             switch (ptrType.type) {
             case 'type2':
@@ -12816,7 +12914,7 @@ var steelseries = (function () {
         // check if we have already created and cached this buffer, if not create it
         if (!drawLinearFrameImage.cache[cacheKey]) {
             frameWidth = Math.sqrt(imageWidth * imageWidth + imageHeight * imageHeight) * 0.04;
-            frameWidth = Math.min(frameWidth, (vertical ? imageWidth : imageHeight) * 0.1);
+            frameWidth = Math.ceil(Math.min(frameWidth, (vertical ? imageWidth : imageHeight) * 0.1));
 
             // Setup buffer
             linFBuffer = createBuffer(imageWidth, imageHeight);
@@ -12824,13 +12922,13 @@ var steelseries = (function () {
 
             // Calculate corner radii
             if (vertical) {
-                OUTER_FRAME_CORNER_RADIUS = imageWidth * 0.05;
+                OUTER_FRAME_CORNER_RADIUS = Math.ceil(imageWidth * 0.05);
                 FRAME_MAIN_CORNER_RADIUS = OUTER_FRAME_CORNER_RADIUS - 1;
-                SUBTRACT_CORNER_RADIUS = imageWidth * 0.028571;
+                SUBTRACT_CORNER_RADIUS = Math.floor(imageWidth * 0.028571);
             } else {
-                OUTER_FRAME_CORNER_RADIUS = imageHeight * 0.05;
+                OUTER_FRAME_CORNER_RADIUS = Math.ceil(imageHeight * 0.05);
                 FRAME_MAIN_CORNER_RADIUS = OUTER_FRAME_CORNER_RADIUS - 1;
-                SUBTRACT_CORNER_RADIUS = imageHeight * 0.028571;
+                SUBTRACT_CORNER_RADIUS = Math.floor(imageHeight * 0.028571);
             }
 
             roundedRectangle(linFCtx, 0, 0, imageWidth, imageHeight, OUTER_FRAME_CORNER_RADIUS);
@@ -12990,7 +13088,7 @@ var steelseries = (function () {
                 roundedRectangle(linFCtx, frameWidth - 1, frameWidth - 1, imageWidth - (frameWidth - 1) * 2, imageHeight - (frameWidth - 1) * 2, SUBTRACT_CORNER_RADIUS);
                 linFCtx.clip();
                 linFCtx.fillStyle = '#333333';
-                linFCtx.fill();
+//                linFCtx.fill();
                 break;
 
             case 'blackMetal':
@@ -13093,12 +13191,12 @@ var steelseries = (function () {
                 break;
             }
 
-            roundedRectangle(linFCtx, frameWidth - 1, frameWidth - 1, imageWidth - (frameWidth - 1) * 2, imageHeight - (frameWidth - 1) * 2, SUBTRACT_CORNER_RADIUS - 1);
+            roundedRectangle(linFCtx, frameWidth, frameWidth, imageWidth - (frameWidth) * 2, imageHeight - (frameWidth) * 2, SUBTRACT_CORNER_RADIUS);
             linFCtx.fillStyle = 'rgb(192, 192, 192)';
 
             // clip out the center of the frame for transparent backgrounds
             linFCtx.globalCompositeOperation = 'destination-out';
-            roundedRectangle(linFCtx, frameWidth, frameWidth, imageWidth - frameWidth * 2, imageHeight - frameWidth * 2, 4);
+            roundedRectangle(linFCtx, frameWidth, frameWidth, imageWidth - frameWidth * 2, imageHeight - frameWidth * 2, SUBTRACT_CORNER_RADIUS);
             linFCtx.fill();
 
             // cache the buffer
@@ -13302,14 +13400,16 @@ var steelseries = (function () {
         // check if we have already created and cached this buffer, if not create it
         if (!drawLinearBackgroundImage.cache[cacheKey]) {
             frameWidth = Math.sqrt(imageWidth * imageWidth + imageHeight * imageHeight) * 0.04;
-            frameWidth = Math.min(frameWidth, (vertical ? imageWidth : imageHeight) * 0.1);
+            frameWidth = Math.ceil(Math.min(frameWidth, (vertical ? imageWidth : imageHeight) * 0.1)) - 1;
 
+            var CORNER_RADIUS = Math.floor((vertical ? imageWidth : imageHeight) * 0.028571);
             // Setup buffer
             linBBuffer = createBuffer(imageWidth, imageHeight);
             linBCtx = linBBuffer.getContext('2d');
             linBColor = backgroundColor;
+            linBCtx.lineWidth = 0;
 
-            roundedRectangle(linBCtx, frameWidth, frameWidth, imageWidth - frameWidth * 2, imageHeight - frameWidth * 2, 4);
+            roundedRectangle(linBCtx, frameWidth, frameWidth, imageWidth - frameWidth * 2, imageHeight - frameWidth * 2, CORNER_RADIUS);
 
             // If the backgroundColor is a texture fill it with the texture instead of the gradient
             if (backgroundColor.name === 'CARBON' || backgroundColor.name === 'PUNCHED_SHEET' ||
@@ -13361,7 +13461,6 @@ var steelseries = (function () {
                               new RgbaColor('#FDFDFD')];
                     grad = new ConicalGradient(fractions, colors);
                     // Set a clip as we will be drawing outside the required area
-                    roundedRectangle(linBCtx, frameWidth, frameWidth, imageWidth - frameWidth * 2, imageHeight - frameWidth * 2, 4);
                     linBCtx.clip();
                     grad.fillRect(linBCtx, imageWidth / 2, imageHeight / 2, imageWidth - frameWidth * 2, imageHeight - frameWidth * 2, imageWidth / 2, imageHeight / 2);
                     // Add an additional inner shadow to fade out brightness at the top
@@ -13370,9 +13469,7 @@ var steelseries = (function () {
                     grad.addColorStop(0.1, 'rgba(0, 0, 0, 0.05)');
                     grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
                     linBCtx.fillStyle = grad;
-                    roundedRectangle(linBCtx, frameWidth, frameWidth, imageWidth - frameWidth * 2, imageHeight - frameWidth * 2, 4);
                     linBCtx.fill();
-                    linBCtx.restore();
 
                     if (backgroundColor.name === 'TURNED') {
                         // Define the turning radius
@@ -13387,8 +13484,7 @@ var steelseries = (function () {
                         linBCtx.save();
 
                         // Set a clip as we will be drawing outside the required area
-                        linBCtx.beginPath();
-                        roundedRectangle(linBCtx, frameWidth, frameWidth, imageWidth - frameWidth * 2, imageHeight - frameWidth * 2, 4);
+                        roundedRectangle(linBCtx, frameWidth, frameWidth, imageWidth - frameWidth * 2, imageHeight - frameWidth * 2, CORNER_RADIUS);
                         linBCtx.clip();
 
                         // set the style for the turnings
@@ -13429,7 +13525,7 @@ var steelseries = (function () {
                 grad.addColorStop(0.5, 'rgba(0, 0, 0, 0)');
                 grad.addColorStop(1, 'rgba(0, 0, 0, 0.25)');
                 linBCtx.fillStyle = grad;
-                roundedRectangle(linBCtx, frameWidth, frameWidth, imageWidth - frameWidth * 2, imageHeight - frameWidth * 2, 4);
+                roundedRectangle(linBCtx, frameWidth, frameWidth, imageWidth - frameWidth * 2, imageHeight - frameWidth * 2, CORNER_RADIUS);
                 linBCtx.fill();
 
                 if (backgroundColor.name === 'BRUSHED_METAL' || backgroundColor.name === 'BRUSHED_STAINLESS') {
@@ -13448,18 +13544,17 @@ var steelseries = (function () {
                 linBCtx.fill();
             }
             // Add a simple inner shadow
-            colors = [ 'rgba(0, 0, 0, 0.3)',
-                       'rgba(0, 0, 0, 0.15)',
-                       'rgba(0, 0, 0, 0.07)',
-                       'rgba(0, 0, 0, 0.03)',
-                       'rgba(0, 0, 0, 0)',
-                       'rgba(0, 0, 0, 0)',
-                       'rgba(0, 0, 0, 0)'
+            colors = [ 'rgba(0, 0, 0, 0.30)',
+                       'rgba(0, 0, 0, 0.20)',
+                       'rgba(0, 0, 0, 0.13)',
+                       'rgba(0, 0, 0, 0.09)',
+                       'rgba(0, 0, 0, 0.06)',
+                       'rgba(0, 0, 0, 0.04)',
+                       'rgba(0, 0, 0, 0.03)'
                      ];
-
             for (i = 0 ; i < 7 ; i++) {
-                roundedRectangle(linBCtx, frameWidth + i, frameWidth + i, imageWidth - frameWidth * 2 - (2 * i), imageHeight - frameWidth * 2 - (2 * i), 4);
                 linBCtx.strokeStyle = colors[i];
+                roundedRectangle(linBCtx, frameWidth + i, frameWidth + i, imageWidth - frameWidth * 2 - (2 * i), imageHeight - frameWidth * 2 - (2 * i), CORNER_RADIUS);
                 linBCtx.stroke();
             }
             // cache the buffer
@@ -13932,12 +14027,12 @@ var steelseries = (function () {
 
                 // Corona
                 grad = ledCtx.createRadialGradient(ledCenterX, ledCenterY, 0, ledCenterX, ledCenterY, size / 2);
-                grad.addColorStop(0, setAlpha(ledColor.coronaColor, 0).color);
-                grad.addColorStop(0.6, setAlpha(ledColor.coronaColor, 0.4).color);
-                grad.addColorStop(0.7, setAlpha(ledColor.coronaColor, 0.25).color);
-                grad.addColorStop(0.8, setAlpha(ledColor.coronaColor, 0.15).color);
-                grad.addColorStop(0.85, setAlpha(ledColor.coronaColor, 0.05).color);
-                grad.addColorStop(1, setAlpha(ledColor.coronaColor, 0).color);
+                grad.addColorStop(0, setAlpha(ledColor.coronaColor, 0));
+                grad.addColorStop(0.6, setAlpha(ledColor.coronaColor, 0.4));
+                grad.addColorStop(0.7, setAlpha(ledColor.coronaColor, 0.25));
+                grad.addColorStop(0.8, setAlpha(ledColor.coronaColor, 0.15));
+                grad.addColorStop(0.85, setAlpha(ledColor.coronaColor, 0.05));
+                grad.addColorStop(1, setAlpha(ledColor.coronaColor, 0));
                 ledCtx.fillStyle = grad;
 
                 ledCtx.beginPath();
@@ -14093,12 +14188,12 @@ var steelseries = (function () {
                 } else {
                     // draw halo
                     fill = trendCtx.createRadialGradient(0.5 * width, 0.2 * height, 0, 0.5 * width, 0.2 * height, 0.7 * width);
-                    fill.addColorStop(0, setAlpha(ledColor.coronaColor, 0).color);
-                    fill.addColorStop(0.5, setAlpha(ledColor.coronaColor, 0.3).color);
-                    fill.addColorStop(0.7, setAlpha(ledColor.coronaColor, 0.2).color);
-                    fill.addColorStop(0.8, setAlpha(ledColor.coronaColor, 0.1).color);
-                    fill.addColorStop(0.85, setAlpha(ledColor.coronaColor, 0.05).color);
-                    fill.addColorStop(1, setAlpha(ledColor.coronaColor, 0).color);
+                    fill.addColorStop(0, setAlpha(ledColor.coronaColor, 0));
+                    fill.addColorStop(0.5, setAlpha(ledColor.coronaColor, 0.3));
+                    fill.addColorStop(0.7, setAlpha(ledColor.coronaColor, 0.2));
+                    fill.addColorStop(0.8, setAlpha(ledColor.coronaColor, 0.1));
+                    fill.addColorStop(0.85, setAlpha(ledColor.coronaColor, 0.05));
+                    fill.addColorStop(1, setAlpha(ledColor.coronaColor, 0));
                     trendCtx.fillStyle = fill;
 
                     trendCtx.beginPath();
@@ -14164,12 +14259,12 @@ var steelseries = (function () {
                 } else {
                     // draw halo
                     fill = trendCtx.createRadialGradient(0.5 * width, 0.5 * height, 0, 0.5 * width, 0.5 * height, 0.7 * width);
-                    fill.addColorStop(0, setAlpha(ledColor.coronaColor, 0).color);
-                    fill.addColorStop(0.5, setAlpha(ledColor.coronaColor, 0.3).color);
-                    fill.addColorStop(0.7, setAlpha(ledColor.coronaColor, 0.2).color);
-                    fill.addColorStop(0.8, setAlpha(ledColor.coronaColor, 0.1).color);
-                    fill.addColorStop(0.85, setAlpha(ledColor.coronaColor, 0.05).color);
-                    fill.addColorStop(1, setAlpha(ledColor.coronaColor, 0).color);
+                    fill.addColorStop(0, setAlpha(ledColor.coronaColor, 0));
+                    fill.addColorStop(0.5, setAlpha(ledColor.coronaColor, 0.3));
+                    fill.addColorStop(0.7, setAlpha(ledColor.coronaColor, 0.2));
+                    fill.addColorStop(0.8, setAlpha(ledColor.coronaColor, 0.1));
+                    fill.addColorStop(0.85, setAlpha(ledColor.coronaColor, 0.05));
+                    fill.addColorStop(1, setAlpha(ledColor.coronaColor, 0));
                     trendCtx.fillStyle = fill;
                     trendCtx.beginPath();
                     trendCtx.arc(0.5 * width, 0.5 * height, 0.7 * width, 0, TWO_PI, true);
@@ -14229,12 +14324,12 @@ var steelseries = (function () {
                 } else {
                     // draw halo
                     fill = trendCtx.createRadialGradient(0.5 * width, 0.8 * height, 0, 0.5 * width, 0.8 * height, 0.7 * width);
-                    fill.addColorStop(0, setAlpha(ledColor.coronaColor, 0).color);
-                    fill.addColorStop(0.5, setAlpha(ledColor.coronaColor, 0.3).color);
-                    fill.addColorStop(0.7, setAlpha(ledColor.coronaColor, 0.2).color);
-                    fill.addColorStop(0.8, setAlpha(ledColor.coronaColor, 0.1).color);
-                    fill.addColorStop(0.85, setAlpha(ledColor.coronaColor, 0.05).color);
-                    fill.addColorStop(1, setAlpha(ledColor.coronaColor, 0).color);
+                    fill.addColorStop(0, setAlpha(ledColor.coronaColor, 0));
+                    fill.addColorStop(0.5, setAlpha(ledColor.coronaColor, 0.3));
+                    fill.addColorStop(0.7, setAlpha(ledColor.coronaColor, 0.2));
+                    fill.addColorStop(0.8, setAlpha(ledColor.coronaColor, 0.1));
+                    fill.addColorStop(0.85, setAlpha(ledColor.coronaColor, 0.05));
+                    fill.addColorStop(1, setAlpha(ledColor.coronaColor, 0));
                     trendCtx.fillStyle = fill;
                     trendCtx.beginPath();
                     trendCtx.arc(0.5 * width, 0.8 * height, 0.7 * width, 0, TWO_PI, true);
@@ -14834,7 +14929,7 @@ var steelseries = (function () {
             for (y = 0; y < height; y++) {
                 dy = height2 - y;
                 for (x = 0; x < width; x++) {
-                    if (y > thicknessY && y < height - thicknessY) {
+                    if (y > thicknessY && y <= height - thicknessY) {
                         // we are in the range where we only draw the sides
                         if (x > thicknessX && x < width - thicknessX) {
                             // we are in the empty 'middle', jump to the next edge
@@ -14909,11 +15004,10 @@ var steelseries = (function () {
         var hexColor = ('#' === hex.charAt(0)) ? hex.substring(1, 7) : hex,
             red = parseInt((hexColor).substring(0, 2), 16),
             green = parseInt((hexColor).substring(2, 4), 16),
-            blue = parseInt((hexColor).substring(4, 6), 16);
+            blue = parseInt((hexColor).substring(4, 6), 16),
+            color = 'rgba(' + red + ',' + green + ',' + blue + ',' + alpha + ')';
 
-        this.color = 'rgba(' + red + ',' + green + ',' + blue + ',' + alpha + ')';
-
-        return this;
+        return color;
     }
 
     function getColorFromFraction(sourceColor, destinationColor, range, fraction, returnRawData) {
@@ -14994,7 +15088,7 @@ var steelseries = (function () {
         ctx.lineTo(x, y + radius);
         ctx.quadraticCurveTo(x, y, x + radius, y);
         ctx.closePath();
-        ctx.stroke();
+//        ctx.stroke();
     }
 
     function createBuffer(width, height) {
@@ -15263,6 +15357,12 @@ var steelseries = (function () {
                 window.setTimeout(callback, 1000 / 16);
             };
     }());
+
+    function getCanvasContext(elementOrId) {
+        var element = (typeof elementOrId === 'string' || elementOrId instanceof String) ?
+            doc.getElementById(elementOrId) : elementOrId;
+        return element.getContext('2d');
+    }
 
 /*
     function blur(ctx, width, height, radius) {

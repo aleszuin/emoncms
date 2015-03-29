@@ -9,7 +9,7 @@
 <script type="text/javascript" src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
 
 <style>
-input[type="text"] {
+#table input[type="text"] {
          width: 88%;
 }
 
@@ -90,6 +90,7 @@ cursor:pointer
                     <option value=60>1 min</option>
                     <option value=300>5 mins</option>
                     <option value=600>10 mins</option>
+                    <option value=900>15 mins</option>
                     <option value=1800>30 mins</option>
                     <option value=3600>1 hour</option>
                     <option value=21600>6 hour</option>
@@ -101,8 +102,8 @@ cursor:pointer
                 </select>
             </td>
             <td>
-                <p><b>Timezone (for day export):</b></p>
-                <input id="export-timezone" type="text" />
+                <p><b>Timezone offset (for day export):</b></p>
+                <input id="export-timezone-offset" type="text" />
             </td>
         </tr>
         <tr>
@@ -236,10 +237,10 @@ cursor:pointer
         $("#SelectedExportFeed").html(table.data[row].tag+": "+table.data[row].name);
         $("#export").attr('feedid',table.data[row].id);
         
-        if ($("#export-timezone").val()=="") {
-            var u = user.get();
-            if (u.timezone==null) u.timezone = 0;
-            $("#export-timezone").val(parseInt(u.timezone));
+        if ($("#export-timezone-offset").val()=="") {
+            var timezoneoffset = user.timezoneoffset();
+            if (timezoneoffset==null) timezoneoffset = 0;
+            $("#export-timezone-offset").val(parseInt(timezoneoffset));
         }
         
         $('#ExportModal').modal('show');
@@ -278,7 +279,7 @@ cursor:pointer
         var export_start = parse_timepicker_time($("#export-start").val());
         var export_end = parse_timepicker_time($("#export-end").val());
         var export_interval = $("#export-interval").val();
-        var export_timezone = parseInt($("#export-timezone").val());
+        var export_timezone_offset = parseInt($("#export-timezone-offset").val());
         
         if (!export_start) {alert("Please enter a valid start date"); return false; }
         if (!export_end) {alert("Please enter a valid end date"); return false; }
@@ -288,7 +289,7 @@ cursor:pointer
         
         if (downloadsize>(10*1048576)) {alert("Download file size to large (download limit: 10Mb)"); return false; }
         
-        window.open(path+"feed/csvexport.json?id="+feedid+"&start="+(export_start+(export_timezone*3600))+"&end="+(export_end+(export_timezone*3600))+"&interval="+export_interval);
+        window.open(path+"feed/csvexport.json?id="+feedid+"&start="+(export_start+(export_timezone_offset))+"&end="+(export_end+(export_timezone_offset))+"&interval="+export_interval);
     });
     
     function parse_timepicker_time(timestr)

@@ -9,7 +9,7 @@ Upgrade EmonCMS
 
 2) rinomina la directory per sicurezza:   esempio
             cd  /var/www/
-            mv emoncms OLD_emoncms
+            mv emoncms OLDx_emoncms
 	    ls -la
 
 3) scarica la nuova versione  ( sempre posizionati su /var/www/ come directory corrente )
@@ -17,7 +17,7 @@ Upgrade EmonCMS
 
 4) copia il file di settings
             cd /var/www/
-            cp ./OLD_emoncms/settings.php ./emoncms/
+            cp ./OLDx_emoncms/settings.php ./emoncms/
 
 5) eventualmente aggiornare il file di settings con quello di default presente nel repository
             cd /var/www/
@@ -30,5 +30,15 @@ Upgrade EmonCMS
 7) riavviare i servizi 
             service apache2 restart
             service rfm12piphp restart
-   forse meglio un reboot per sicurezza
+            # forse meglio un reboot per sicurezza
+	    reboot now
 
+
+POST:)  
+a) Controllare che Modulo Raspberry funzioni e collezioni dati
+b)  eventualmente far partire il servizio di raccolta dati in modalità log
+	service rfm12piphp stop
+	service rfm12piphp start log
+	tail -f  /var/log/rfm12piphp.log
+
+	
