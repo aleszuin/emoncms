@@ -377,5 +377,195 @@ function setup_steelseries_object(elementclass)
 	}
 	}
 	
+    // Start of SSGeneric
+	if (elementclass=="SSGeneric"){
+        var generictype = $(this).attr("generictype");
+        if (generictype == undefined)  {  generictype="Compass"  };
+        // Per ogni tipologia di controllo Steel esistente
+        if (generictype=="Compass"){
+            SteelseriesObjects[$(this).attr("id")] = new steelseries.Compass(id, {
+                                width: $(this).width(),
+                                unitStringVisible: 	unitstringbool,
+                                unitString: 		unitstring,
+                                headerString: 		headerString,
+                                headerStringVisible:headerStringbool,
+                                valuesNumeric: 		true,
+                                digitalFont: 		true,
+                                lcdDecimals: 		lcdDecimals,
+                                lcdVisible:         true,
+                                autoScroll:         true
+							});
+        }
+        else if (generictype=="WindDirection"){
+            SteelseriesObjects[$(this).attr("id")] = new steelseries.WindDirection(id, {
+                                width: $(this).width(),
+                                unitStringVisible: 	unitstringbool,
+                                unitString: 		unitstring,
+                                headerString: 		headerString,
+                                headerStringVisible:headerStringbool,
+                                valuesNumeric: 		true,
+                                digitalFont: 		true,
+                                lcdDecimals: 		lcdDecimals,
+                                lcdVisible:         true,
+                                degreeScaleHalf:    true,
+                                autoScroll:         true
+							});
+        }
+        else if (generictype=="Level"){
+            SteelseriesObjects[$(this).attr("id")] = new steelseries.Level(id, {
+                                width: $(this).width(),
+                                unitStringVisible: 	unitstringbool,
+                                unitString: 		unitstring,
+                                headerString: 		headerString,
+                                headerStringVisible:headerStringbool,
+                                valuesNumeric: 		true,
+                                digitalFont: 		true,
+                                lcdDecimals: 		lcdDecimals,
+                                lcdVisible:         true,
+                                autoScroll:         true
+							});
+        }
+        else if (generictype=="Horizon"){
+            SteelseriesObjects[$(this).attr("id")] = new steelseries.Horizon(id, {
+                                width: $(this).width(),
+                                unitStringVisible: 	unitstringbool,
+                                unitString: 		unitstring,
+                                headerString: 		headerString,
+                                headerStringVisible:headerStringbool,
+                                valuesNumeric: 		true,
+                                digitalFont: 		true,
+                                lcdDecimals: 		lcdDecimals,
+                                lcdVisible:         true,
+                                autoScroll:         true
+							});
+        }
+        else if (generictype=="Led"){
+            SteelseriesObjects[$(this).attr("id")] = new steelseries.Led(id, {
+                                width: $(this).width(),
+                                unitStringVisible: 	unitstringbool,
+                                unitString: 		unitstring,
+                                headerString: 		headerString,
+                                headerStringVisible:headerStringbool,
+                                valuesNumeric: 		true,
+                                digitalFont: 		true,
+                                lcdDecimals: 		lcdDecimals,
+                                lcdVisible:         true,
+                                autoScroll:         true
+							});
+        }
+        else if (generictype=="Clock"){
+            SteelseriesObjects[$(this).attr("id")] = new steelseries.Clock(id, {
+                                width: $(this).width(),
+                                unitStringVisible: 	unitstringbool,
+                                unitString: 		unitstring,
+                                headerString: 		headerString,
+                                headerStringVisible:headerStringbool,
+                                valuesNumeric: 		true,
+                                digitalFont: 		true,
+                                lcdDecimals: 		lcdDecimals,
+                                lcdVisible:         true,
+                                autoScroll:         true
+							});
+        }
+        else if (generictype=="Battery"){
+            SteelseriesObjects[$(this).attr("id")] = new steelseries.Battery(id, {
+                                width: $(this).width(),
+                                unitStringVisible: 	unitstringbool,
+                                unitString: 		unitstring,
+                                headerString: 		headerString,
+                                headerStringVisible:headerStringbool,
+                                valuesNumeric: 		true,
+                                digitalFont: 		true,
+                                lcdDecimals: 		lcdDecimals,
+                                lcdVisible:         true,
+                                autoScroll:         true
+							});
+        }
+        else if (generictype=="Altimeter"){
+            SteelseriesObjects[$(this).attr("id")] = new steelseries.Altimeter(id, {
+                                width: $(this).width(),
+                                unitStringVisible: 	  unitstringbool,
+                                unitString: 		  unitstring,
+                                headerString: 		  headerString,
+                                headerStringVisible:  headerStringbool,
+                                valuesNumeric: 		  true,
+                                digitalFont: 		  true,
+                                lcdDecimals: 		  lcdDecimals,
+                                lcdVisible:           true,
+                                autoScroll:           true
+							});
+        }
+        else if (generictype=="Odometer"){
+            SteelseriesObjects[$(this).attr("id")] = new steelseries.Odometer(id, {
+                                width: $(this).width(),
+                                unitStringVisible: 	unitstringbool,
+                                unitString: 		unitstring,
+                                headerString: 		headerString,
+                                headerStringVisible:headerStringbool,
+                                valuesNumeric: 		true,
+                                digitalFont: 		true,
+                                lcdDecimals: 		lcdDecimals,
+                                lcdVisible:         true,
+                                autoScroll:         true
+							});
+        }
+        else if (generictype=="LightBulb"){
+            SteelseriesObjects[$(this).attr("id")] = new steelseries.LightBulb(id, {
+                                width: $(this).width(),
+                                unitStringVisible: 	unitstringbool,
+                                unitString: 		unitstring,
+                                headerString: 		headerString,
+                                headerStringVisible:headerStringbool,
+                                valuesNumeric: 		true,
+                                digitalFont: 		true,
+                                lcdDecimals: 		lcdDecimals,
+                                lcdVisible:         true,
+                                autoScroll:         true
+							});
+        }
+        else if (generictype=="gradientWrapper"){
+            SteelseriesObjects[$(this).attr("id")] = new steelseries.gradientWrapper(id, {
+                                width: $(this).width(),
+                                unitStringVisible: 	unitstringbool,
+                                unitString: 		unitstring,
+                                headerString: 		headerString,
+                                headerStringVisible:headerStringbool,
+                                valuesNumeric: 		true,
+                                digitalFont: 		true,
+                                lcdDecimals: 		lcdDecimals,
+                                lcdVisible:         true,
+                                autoScroll:         true
+							});
+        }
+        else if (generictype=="StopWatch"){
+            SteelseriesObjects[$(this).attr("id")] = new steelseries.StopWatch(id, {
+                                width: $(this).width(),
+                                unitStringVisible: 	unitstringbool,
+                                unitString: 		unitstring,
+                                headerString: 		headerString,
+                                headerStringVisible:headerStringbool,
+                                valuesNumeric: 		true,
+                                digitalFont: 		true,
+                                lcdDecimals: 		lcdDecimals,
+                                lcdVisible:         true,
+                                autoScroll:         true
+							});
+        }
+
+        //Pointer Exception Handle
+	
+        //var PointerType = $(this).attr("pointertype");
+        //if (PointerType == undefined){PointerType = "TYPE1";}
+        //SteelseriesObjects[$(this).attr("id")].setPointerType(steelseries.PointerType[PointerType]);
+
+        //var pointercolour = $(this).attr("pointercolour");
+        //if (pointercolour == undefined){pointercolour = "RED";}
+        //SteelseriesObjects[$(this).attr("id")].setPointerColor(steelseries.ColorDef[pointercolour]);
+        //var ForegroundType = $(this).attr("ForegroundType");
+        //if (ForegroundType == undefined){  ForegroundType = "TYPE1";  }
+        //SteelseriesObjects[$(this).attr("id")].setForegroundType(steelseries.ForegroundType[ForegroundType]);
+	}
+    // End of SSGeneric
+    
   });
-}
+  }

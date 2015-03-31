@@ -28,6 +28,7 @@ var LcdColor=			["BEIGE","BLUE","ORANGE","RED","YELLOW","WHITE","GRAY","BLACK","
 var LedColor=			["RED","GREEN","BLUE","ORANGE","YELLOW","CYAN","MAGENTA"];
 var LinearTypeArray =	["Linear","LinearBargraph","LinearThermoStat"];
 var RadialTypeArray =	["Radial","RadialBargraph","RadialVertical"];
+var GenericTypeArray =	["Compass","WindDirection","Level","Horizon","Led","Clock","Battery","Altimeter","Odometer","LightBulb","gradientWrapper","StopWatch"];
 
 var selected_edges = {none : 0, left : 1, right : 2, top : 3, bottom : 4, center : 5};
 
@@ -201,6 +202,15 @@ var designer = {
 						{
 							var selected = ""; if (val == RadialTypeArray[i]) {selected = "selected";}
 							options_html += "<option value='"+ RadialTypeArray[i] + "'"+selected+" >"+RadialTypeArray[i]+"</option>";
+						}
+					
+			}
+			else if (options_type && options_type[z] == "generictype"){
+				options_html += "<td><select id='"+box_options[z]+"' class='options' >";
+					for (i in GenericTypeArray)
+						{
+							var selected = ""; if (val == GenericTypeArray[i]) {selected = "selected";}
+							options_html += "<option value='"+ GenericTypeArray[i] + "'"+selected+" >"+GenericTypeArray[i]+"</option>";
 						}
 					
 			}
