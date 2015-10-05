@@ -17,8 +17,8 @@
 // 1) Setup swift mailer transport 
 require_once 'swift_required.php';
 $transport = Swift_SmtpTransport::newInstance('smtp.libero.it', 26)
-  ->setUsername('alessandro.zuin@libero.it')
-  ->setPassword('Paperino123')
+  ->setUsername('nome.cognome@libero.it')
+  ->setPassword('password_mail')
 ;
 // Create the Mailer using your created Transport
 $mailer = Swift_Mailer::newInstance($transport);
